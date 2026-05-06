@@ -83,40 +83,40 @@ quadList Map::chooseRoom(std::string mapName, int lvl)
 			continue;
 		}
 
-		tmp->addRoom(temp, this->_sessionId);
+		tmp->addRoom(temp, this->_sessionId, this->_quanticRooms, *this);
 		return tmp;
 	}
 }
 
 static void chooseDirections(quadList &node, std::array<bool, 4> &directions)
 {
-	if (node.get()->north.expired() == false)
+	if (node->north.expired() == false)
 	{
-		quadList next = node.get()->north.lock();
+		quadList next = node->north.lock();
 		if (next && next->getPath() > 0 && node->getPath() != 3)
 			directions[0] = 1;
 		else if (next && next->getPath() == 3 && node->getPath() == 3)
 			directions[0] = 1;
 	}
-	if (node.get()->east.expired() == false)
+	if (node->east.expired() == false)
 	{
-		quadList next = node.get()->east.lock();
+		quadList next = node->east.lock();
 		if (next && next->getPath() && node->getPath() != 3)
 			directions[1] = 1;
 		else if (next && next->getPath() == 3 && node->getPath() == 3)
 			directions[1] = 1;
 	}
-	if (node.get()->south.expired() == false)
+	if (node->south.expired() == false)
 	{
-		quadList next = node.get()->south.lock();
+		quadList next = node->south.lock();
 		if (next && next->getPath() && node->getPath() != 3)
 			directions[2] = 1;
 		else if (next && next->getPath() == 3 && node->getPath() == 3)
 			directions[2] = 1;
 	}
-	if (node.get()->west.expired() == false)
+	if (node->west.expired() == false)
 	{
-		quadList next = node.get()->west.lock();
+		quadList next = node->west.lock();
 		if (next && next->getPath() && node->getPath() != 3)
 			directions[3] = 1;
 		else if (next && next->getPath() == 3 && node->getPath() == 3)
@@ -188,7 +188,7 @@ static void selectRoom(quadList &node, std::vector<Room> &candidates, std::array
 	}
 }
 
-static void selectAndAddRoom(quadList &node, int lvl, std::string &sessionId)
+void Map::selectAndAddRoom(quadList &node, int lvl, std::string &sessionId)
 {
 	if (!node->getRoom())
 	{
@@ -209,7 +209,7 @@ static void selectAndAddRoom(quadList &node, int lvl, std::string &sessionId)
 				continue ;
 			}
 			int r = rand() % candidates.size();
-			node->addRoom(candidates[r], sessionId);
+			node->addRoom(candidates[r], sessionId, this->_quanticRooms, *this);
 			break ;
 		}
 	}
@@ -336,7 +336,7 @@ void Map::fillPrimaryPath(int lvl)
 	{
 		if (node->getPath() != 3)
 			continue ;
-		selectAndAddRoom(node, lvl, this->_sessionId);
+		this->selectAndAddRoom(node, lvl, this->_sessionId);
 		if (!node->north.expired() && !node->north.lock()->getPath())
 			node->north.lock()->setPath(1);
 		if (!node->east.expired() && !node->east.lock()->getPath())
@@ -358,32 +358,32 @@ void Map::fillOtherRooms(int lvl)
 		{
 			if (node->getPath() != 1 && node->getPath() != 2)
 				continue ;
-			selectAndAddRoom(node, lvl, this->_sessionId);
+			this->selectAndAddRoom(node, lvl, this->_sessionId);
 			if (!node->north.expired() && !node->north.lock()->getPath())
 			{
 				quadList next = node->north.lock();
-				selectAndAddRoom(next, lvl, this->_sessionId);
+				this->selectAndAddRoom(next, lvl, this->_sessionId);
 				next->setPath(1);
 				count++;
 			}
 			if (!node->east.expired() && !node->east.lock()->getPath())
 			{
 				quadList next = node->east.lock();
-				selectAndAddRoom(next, lvl, this->_sessionId);
+				this->selectAndAddRoom(next, lvl, this->_sessionId);
 				next->setPath(1);
 				count++;
 			}
 			if (!node->south.expired() && !node->south.lock()->getPath())
 			{
 				quadList next = node->south.lock();
-				selectAndAddRoom(next, lvl, this->_sessionId);
+				this->selectAndAddRoom(next, lvl, this->_sessionId);
 				next->setPath(1);
 				count++;
 			}
 			if (!node->west.expired() && !node->west.lock()->getPath())
 			{
 				quadList next = node->west.lock();
-				selectAndAddRoom(next, lvl, this->_sessionId);
+				this->selectAndAddRoom(next, lvl, this->_sessionId);
 				next->setPath(1);
 				count++;
 			}
@@ -392,6 +392,7 @@ void Map::fillOtherRooms(int lvl)
 }
 void Map::fillMap(int numPlayers, int depth)
 {
+	this->_quanticRooms = nullptr;
 	while (true)
 	{
 		try

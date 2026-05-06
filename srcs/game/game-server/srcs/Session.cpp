@@ -12,6 +12,9 @@ Session::Session(void): _maxNumPlayer(2), _running(0), _ended(0), _startTime(std
 		this->_sessionId.push_back(set[nb]);
 	}
 
+	_separedSpace.emplace_back(3, 3, this->_sessionId);
+	_separedSpace.emplace_back(3, 3, this->_sessionId);
+	
 	_maps.emplace_back(1, 1, this->_sessionId);
 	_maps.back().setWaitingRoom();
 	_maps.emplace_back(size, size, this->_sessionId);
@@ -34,6 +37,8 @@ Session::Session(int numPLayer):	_maxNumPlayer(numPLayer), _running(0), _ended(0
 		int nb = rand() % 62;
 		this->_sessionId.push_back(set[nb]);
 	}
+
+	_maps.reserve(3);
 
 	_maps.emplace_back(1, 1, this->_sessionId);
 	_maps.back().setWaitingRoom();
@@ -173,15 +178,16 @@ void	Session::addParty(Party &newParty)
 	std::string msg;
 	for (std::weak_ptr<Player> &player : newParty.getPlayers())
 	{
-		if (player.expired())
+		if (player.expired() || !player.lock()->isReConnected())
 			continue ;
-		player.lock()->setNode(this->_maps[0].getNodes()[0]);
-		if (player.lock()->getWs()->subscribe(player.lock()->getRoom().getRoomId()))
+		auto p = player.lock();
+		p->setNode(this->_maps[0].getNodes()[0]);
+		if (p->getWs()->subscribe(p->getRoom().getRoomId()))
 			std::cout << "added to the waiting room" << std::endl;
 		this->_players.push_back(player);
 		msg = this->sendMaps();
-		player.lock()->getWs()->send(msg, uWS::OpCode::TEXT);
-        player.lock()->getWs()->send("You have been added to a session !", uWS::OpCode::TEXT);
+		p->getWs()->send(msg, uWS::OpCode::TEXT);
+        p->getWs()->send("You have been added to a session !", uWS::OpCode::TEXT);
 	}
 }
 

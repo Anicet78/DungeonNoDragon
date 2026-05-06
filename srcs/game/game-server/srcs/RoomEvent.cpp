@@ -11,7 +11,7 @@ MobRush::~MobRush() {
 	return ;
 }
 
-bool	farEnought(float objetX, float objetY, float farX, float farY)
+static bool	farEnought(float objetX, float objetY, float farX, float farY)
 {
 	if (std::fabs(farY - objetY) + std::fabs(farX - objetX) > 5.0f)
 		return (true);

@@ -25,6 +25,7 @@ SRCS =  main.cpp \
 		map/aStar.cpp \
 		Room.cpp \
 		RoomEvent.cpp \
+		QuanticRoomEvent.cpp \
 		Mob.cpp \
 		Player.cpp \
 		HitBox.cpp \

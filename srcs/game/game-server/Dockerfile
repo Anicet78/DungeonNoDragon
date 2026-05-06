@@ -18,7 +18,7 @@ RUN make -j
 
 FROM debian:trixie-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends libcurl4-openssl-dev && rm -rf /var/lib/apt/lists/*-
+RUN apt-get update && apt-get install -y --no-install-recommends libcurl4-openssl-dev valgrind && rm -rf /var/lib/apt/lists/*-
 
 WORKDIR /src/game-server
 COPY --from=builder /app/game-server .

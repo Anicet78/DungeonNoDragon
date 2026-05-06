@@ -19,17 +19,95 @@ void chainedMap::resetRoom()
 	this->_room.reset();
 }
 
-void chainedMap::addRoom(const Room &room, std::string sessionId)
+void chainedMap::addRoom(const Room &room, std::string sessionId, std::shared_ptr<Room> &qRoom, Map &map)
 {
 	if (this->_room)
 		*this->_room = room;
 	else
 		this->_room = std::make_shared<Room>(room);
 
+	QuanticRoom *qEvent = nullptr;
+	if (qRoom)
+	{
+		auto ref = qRoom->getRoomEventRef();
+		qEvent = dynamic_cast<QuanticRoom *>(ref.get());
+	}
 	this->_room->setRoomId(sessionId + ":" + room.getName() + "_" + std::to_string(this->getX()) + std::to_string(this->getY()));
-	this->_room->setEvent();
+	std::array<std::weak_ptr<chainedMap>, 4> dir = {this->north, this->east, this->south, this->west};
+	uint8_t val = rand() % 100;
+	if (val < 80)
+	{
+		val = rand() % 100;
+		bool set = false;
+		if (val < 50 || (qRoom && this->_room->getName() == qRoom->getName()))
+		{
+			val = 49;
+			if (!qRoom || !qEvent)
+			{
+				if (this->_room->setEvent(2, dir))
+				{
+					map.setQRoom(this->_room);
+					set = true;
+					QuanticRoom &event = dynamic_cast<QuanticRoom &>(*this->_room->getRoomEventRef());
+					std::array<quadList, 2>	nodes = map.getNodesQuantic();
+					event.addPlace({nodes[0]->north, nodes[0]->east, nodes[0]->south, nodes[0]->west}, 1);
+					nodes[0]->_room = this->_room;
+					std::cout << "first quantic at: " << this->_x << ", " << this->_y << std::endl;
+				}
+			}
+			else if (!qEvent->doesAllLocSet())
+			{
+				if (!(this->_room->getName() != qRoom->getName() || this->_room->getExits() != qRoom->getExits()))
+				{
+					std::cout << "quantic done 2 at: " << this->_x << ", " << this->_y << std::endl;
+					this->_room = qRoom;
+					QuanticRoom &event = dynamic_cast<QuanticRoom &>(*this->_room->getRoomEventRef());
+					event.addPlace({this->north, this->east, this->south, this->west}, 0);
+					set = true;
+				}
+			}
+		}
+		if (val >= 50 || !set)
+			this->_room->setEvent(1, dir);
+	}
 
 	auto exits = this->_room->getExits();
+	if (this->_room->getRoomEvent() && this->_room->getRoomEvent()->getType() == "QuanticRoom")
+	{
+		std::array<quadList, 2>	nodes = map.getNodesQuantic();
+		if (exits[0] && !this->north.expired())
+		{
+			auto tmp = this->north.lock();	
+			if (!tmp->getRoom())
+				tmp->setPath(1);
+			tmp->south = nodes[0];
+			this->north.reset();
+		}
+		if (exits[1] && !this->east.expired())
+		{
+			auto tmp = this->east.lock();	
+			if (!tmp->getRoom())
+				tmp->setPath(1);
+			tmp->west = nodes[0];
+			this->east.reset();
+		}
+		if (exits[2] && !this->south.expired())
+		{
+			auto tmp = this->south.lock();	
+			if (!tmp->getRoom())
+				tmp->setPath(1);
+			tmp->north = nodes[0];
+			this->south.reset();
+		}
+		if (exits[3] && !this->west.expired())
+		{
+			auto tmp = this->west.lock();	
+			if (!tmp->getRoom())
+				tmp->setPath(1);
+			tmp->east = nodes[0];
+			this->west.reset();
+		}
+	}
 
 	if (!exits[0] && !this->north.expired())
 	{
@@ -123,6 +201,21 @@ Map::Map(std::string sessionId) : _sessionId(sessionId)
 				_nodes[i * 5 + j]->south = _nodes[(i + 1) * 5 + j];
 		}
 	}
+	_nodesQuantic[0] = std::make_shared<chainedMap>();
+	_nodesQuantic[1] = std::make_shared<chainedMap>();
+	_nodesQuantic[1]->setX(1);
+	_nodesQuantic[1]->setY(0);
+
+	_nodesQuantic[0]->north = _nodesQuantic[1];
+	_nodesQuantic[0]->south = _nodesQuantic[1];
+	_nodesQuantic[0]->east = _nodesQuantic[1];
+	_nodesQuantic[0]->west = _nodesQuantic[1];
+	_nodesQuantic[0]->setPath(1);
+
+	_nodesQuantic[1]->north = _nodesQuantic[0];
+	_nodesQuantic[1]->south = _nodesQuantic[0];
+	_nodesQuantic[1]->east = _nodesQuantic[0];
+	_nodesQuantic[1]->west = _nodesQuantic[0];
 }
 
 Map::Map(int width, int height, std::string sessionId) : _sessionId(sessionId)
@@ -152,6 +245,22 @@ Map::Map(int width, int height, std::string sessionId) : _sessionId(sessionId)
 				_nodes[i * width + j]->south = _nodes[(i + 1) * width + j];
 		}
 	}
+
+	_nodesQuantic[0] = std::make_shared<chainedMap>();
+	_nodesQuantic[1] = std::make_shared<chainedMap>();
+	_nodesQuantic[1]->setX(1);
+	_nodesQuantic[1]->setY(0);
+
+	_nodesQuantic[0]->north = _nodesQuantic[1];
+	_nodesQuantic[0]->south = _nodesQuantic[1];
+	_nodesQuantic[0]->east = _nodesQuantic[1];
+	_nodesQuantic[0]->west = _nodesQuantic[1];
+	_nodesQuantic[0]->setPath(1);
+
+	_nodesQuantic[1]->north = _nodesQuantic[0];
+	_nodesQuantic[1]->south = _nodesQuantic[0];
+	_nodesQuantic[1]->east = _nodesQuantic[0];
+	_nodesQuantic[1]->west = _nodesQuantic[0];
 }
 
 Map::~Map(void)
@@ -161,6 +270,7 @@ Map::~Map(void)
 
 void	Map::reset()
 {
+	this->_quanticRooms = nullptr;
 	for (int i = 0; i < _height; i++)
 	{
 		for (int j = 0; j < _width; j++)
@@ -204,12 +314,23 @@ void	Map::link(Map &up)
 
 void	Map::setWaitingRoom()
 {
-	this->_nodes[0]->addRoom(Room::getWatingRoom(), this->_sessionId);
+	std::shared_ptr<Room> room = nullptr;
+	this->_nodes[0]->addRoom(Room::getWatingRoom(), this->_sessionId, room, *this);
+}
+
+void Map::setQRoom(std::shared_ptr<Room> qRoom)
+{
+	this->_quanticRooms = qRoom;
 }
 
 quadList &Map::getHead()
 {
 	return this->_head;
+}
+
+std::array<quadList, 2>	Map::getNodesQuantic() const
+{
+	return this->_nodesQuantic;
 }
 
 std::vector<quadList> Map::getNodes() const

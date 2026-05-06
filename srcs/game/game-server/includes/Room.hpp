@@ -4,45 +4,82 @@
 
 # include "Mob.hpp"
 
+class chainedMap;
+
 class ARoomEvent
 {
-protected:
-	std::string _type;
-public:
-	virtual ~ARoomEvent() {};
-	virtual	void	createEvent(void) = 0;
-	virtual bool	isCleared(void) = 0;
-	virtual bool	isStarted(void) = 0;
-	virtual void	checkCleared(void) = 0;
-	std::string	const	&getType(void) const;
+	protected:
+		std::string _type;
+	public:
+		virtual ~ARoomEvent() {};
+		virtual	void	createEvent(void) = 0;
+		virtual bool	isCleared(void) = 0;
+		virtual bool	isStarted(void) = 0;
+		virtual void	checkCleared(void) = 0;
+		std::string	const	&getType(void) const;
 };
 
 //make the room event a mob rush, player need to kill every mob in the room to clear it
 class MobRush : public ARoomEvent
 {
-private:
-	std::vector<std::string>			&_roomPlan;
-	std::unordered_map<int, std::unique_ptr<Mob>>	_mobs;
-	std::vector<int>					_mobsId;
-	int									_nbrMob;
-	int									_nbrDead;
+	private:
+		std::vector<std::string>			&_roomPlan;
+		std::unordered_map<int, std::unique_ptr<Mob>>	_mobs;
+		std::vector<int>					_mobsId;
+		int									_nbrMob;
+		int									_nbrDead;
 
-	bool	_started;
-	bool	_cleared;
+		bool	_started;
+		bool	_cleared;
 
-	void	createEvent(void);
-public:
-	MobRush(std::vector<std::string> &roomPlan);
-	~MobRush();
+		void	createEvent(void);
+	public:
+		MobRush(std::vector<std::string> &roomPlan);
+		~MobRush();
 
-	bool	isCleared(void);
-	bool	isStarted(void);
-	void	destroyEvent(void);
-	void	checkCleared(void);
+		bool	isCleared(void);
+		bool	isStarted(void);
+		void	destroyEvent(void);
+		void	checkCleared(void);
 
-	void	makeDie(int id);
+		void	makeDie(int id);
 
-	std::unordered_map<int, std::unique_ptr<Mob>>	&getMobs(void);
+		std::unordered_map<int, std::unique_ptr<Mob>>	&getMobs(void);
+};
+
+class QuanticRoom : public ARoomEvent
+{
+	private:
+		std::vector<std::string>						&_roomPlan;
+		std::unordered_map<int, std::unique_ptr<Mob>>	_mobs;
+		std::vector<int>					_mobsId;
+		int									_nbrMob;
+		int									_nbrDead;
+
+		std::array<std::array<std::weak_ptr<chainedMap>, 4>, 5>	_links;
+		
+		uint8_t				_current_place;
+		std::array<int, 2>	_light_place;
+		bool				_started;
+		bool				_lights_on;
+		bool				_isEventOnFloor;
+		bool				_doesAllLocSet;
+		
+	private:
+		void	createEvent(void);
+	
+	public:
+		QuanticRoom(std::vector<std::string> &roomplan, std::array<std::weak_ptr<chainedMap>, 4> dir);
+		~QuanticRoom();
+
+	public:
+		
+		void	addPlace(std::array<std::weak_ptr<chainedMap>, 4> dir, bool is5thLoc);
+		bool	doesAllLocSet();
+		bool	isCleared(void);
+		bool	isStarted(void);
+		void	checkCleared(void);
+		void	makeDie(int id);
 };
 
 class Room
@@ -61,6 +98,8 @@ class Room
 		std::array<std::array<int, 2>, 4> _exitsLoc;
 		//Name of the room
 		std::string _name;
+		//floor of the room
+		uint8_t	_floor;
 		//Plan of the room
 		std::vector<std::string> _roomPlan;
 		//Wating Room maps
@@ -106,7 +145,7 @@ class Room
 		static void											importRooms();
 		void												randomizeRoom();
 		void												turnMapLeft(void);
-		void												setEvent(void);
+		bool												setEvent(uint8_t event, std::array<std::weak_ptr<chainedMap>, 4> dir);
 		void												setRoomId(std::string id);
 		std::shared_ptr<ARoomEvent>							getRoomEvent(void) const;
 		std::shared_ptr<ARoomEvent>							getRoomEventRef(void);

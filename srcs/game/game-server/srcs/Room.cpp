@@ -1,11 +1,11 @@
 #include "Room.hpp"
 
-std::map<std::string, std::shared_ptr<Room>> Room::_RoomsF0;
-std::map<std::string, std::shared_ptr<Room>> Room::_RoomsF1;
-std::map<std::string, std::shared_ptr<Room>> Room::_RoomsF2;
-std::map<std::string, std::shared_ptr<Room>> Room::_RoomsF3;
-std::map<std::string, std::shared_ptr<Room>> Room::_RoomsF4;
-std::map<std::string, std::shared_ptr<Room>> Room::_WaitingRooms;
+std::map<std::string, std::shared_ptr<Room>>	Room::_RoomsF0;
+std::map<std::string, std::shared_ptr<Room>>	Room::_RoomsF1;
+std::map<std::string, std::shared_ptr<Room>>	Room::_RoomsF2;
+std::map<std::string, std::shared_ptr<Room>>	Room::_RoomsF3;
+std::map<std::string, std::shared_ptr<Room>>	Room::_RoomsF4;
+std::map<std::string, std::shared_ptr<Room>>	Room::_WaitingRooms;
 
 Room &Room::operator=(Room const &rhs)
 {
@@ -33,10 +33,11 @@ Room::Room(void)
 	this->_exitsLoc.fill({-1, -1});
 	this->_name = "Empty";
 	this->_roomID = "None";
+	this->_floor = 0;
 }
 
 Room::Room(Room const &rhs): _roomID(rhs._roomID), _width(rhs._width), _height(rhs._height), _rotated(rhs._rotated),
-				_exits(rhs._exits), _exitsLoc(rhs._exitsLoc), _name(rhs._name), _roomPlan(rhs._roomPlan), _event(rhs._event)
+				_exits(rhs._exits), _exitsLoc(rhs._exitsLoc), _name(rhs._name), _floor(rhs._floor), _roomPlan(rhs._roomPlan), _event(rhs._event)
 {}
 
 Room::~Room()
@@ -186,7 +187,6 @@ void Room::turnMapLeft()
 	this->identifyExits();
 }
 
-
 std::map<std::string, std::shared_ptr<Room>> Room::getFloor(int nb)
 {
 	if (!nb)
@@ -270,19 +270,17 @@ void Room::importRooms()
 	Room::importFloor(path + "floor1/", _RoomsF1);
 }
 
-void	Room::setEvent(void)
+bool	Room::setEvent(uint8_t event, std::array<std::weak_ptr<chainedMap>, 4> dir)
 {
-	//NERFED, TOO HARD
-	if (!_event && (rand() % 100) < 45) // <- from 60 to 45
-	{
-		std::string	name(getName());
-		if (name != "start" && name != "stairs" && name != "waiting")
-		{
-			_event = std::make_shared<MobRush>(this->_roomPlan);
-		}
-	}
-	//----------------
-	return ;
+	std::string	name(getName());
+	if (name == "start" || name == "stairs" || name == "waiting")
+		return false;
+
+	if (!_event && event == 1)
+		_event = std::make_shared<MobRush>(this->_roomPlan);
+	else if (!_event && event == 2)
+		_event = std::make_shared<QuanticRoom>(this->_roomPlan, dir);
+	return true;
 }
 
 void	Room::setRoomId(std::string id)

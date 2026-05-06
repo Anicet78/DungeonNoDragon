@@ -13,6 +13,7 @@ class Session
 		std::vector<std::string>					_spectators;//maybe spectator class later
 		std::vector<std::weak_ptr<Player>>			_players;
 		std::vector<Map>							_maps;
+		std::vector<Map>							_separedSpace;
 		std::string									_sessionId;
 		bool										_running;
 		bool										_ended;

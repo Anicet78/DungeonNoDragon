@@ -1,13 +1,15 @@
 #include "Room.hpp"
 
 
-QuanticRoom::QuanticRoom(std::vector<std::string> &roomPlan, std::array<std::weak_ptr<chainedMap>, 4> dir): _roomPlan(roomPlan), _nbrDead(0), _started(false), _lights_on(true)
+QuanticRoom::QuanticRoom(std::vector<std::string> &roomPlan, std::array<std::weak_ptr<chainedMap>, 4> dir, int x, int y): _roomPlan(roomPlan), _nbrDead(0), _started(false), _lights_on(true)
 {
 	this->_type = "QuanticRoom";
 	this->_lights_on = true;
 	this->_started = false;
 	this->_current_place = 0;
 	this->_links[0] = dir;
+	this->_linksPos = {{{-1}}};
+	this->_linksPos[0] = {x, y};
 	_isEventOnFloor = true;
 	_doesAllLocSet = false;
 	createEvent();
@@ -67,7 +69,6 @@ void QuanticRoom::createEvent(void)
 		if (_roomPlan[y][x] == '1')
 		{
 			this->_light_place = {x, y};
-			_roomPlan[y][x] = 'L';
 			break ;
 		}
 	}
@@ -93,7 +94,10 @@ void	QuanticRoom::addPlace(std::array<std::weak_ptr<chainedMap>, 4> dir, bool is
 		_doesAllLocSet = true;
 }
 
-
+std::array<std::weak_ptr<chainedMap>, 4> QuanticRoom::getCurrentExit(void) const
+{
+	return this->_links[this->_current_place];
+}
 
 bool QuanticRoom::doesAllLocSet()
 {
@@ -116,11 +120,26 @@ void	QuanticRoom::makeDie(int id)
 
 bool	QuanticRoom::isCleared(void)
 {
-	return (0);
+	return (true);
 }
 
 void	QuanticRoom::checkCleared(void)
 {
 	if (0 == false && _nbrDead == _nbrMob)
 		;
+}
+
+std::array<std::array<std::weak_ptr<chainedMap>, 4>, 5> QuanticRoom::getLinks(void) const
+{
+	return this->_links;
+}
+
+std::array<std::array<int, 2>, 5> QuanticRoom::getLinksPos(void) const
+{
+	return this->_linksPos;
+}
+
+std::unordered_map<int, std::unique_ptr<Mob> >	&QuanticRoom::getMobs(void)
+{
+	return (_mobs);
 }

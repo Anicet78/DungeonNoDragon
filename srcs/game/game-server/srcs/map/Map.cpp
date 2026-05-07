@@ -44,7 +44,7 @@ void chainedMap::addRoom(const Room &room, std::string sessionId, std::shared_pt
 			val = 49;
 			if (!qRoom || !qEvent)
 			{
-				if (this->_room->setEvent(2, dir))
+				if (this->_room->setEvent(2, dir, this->_x, this->_y))
 				{
 					map.setQRoom(this->_room);
 					set = true;
@@ -68,7 +68,7 @@ void chainedMap::addRoom(const Room &room, std::string sessionId, std::shared_pt
 			}
 		}
 		if (val >= 50 || !set)
-			this->_room->setEvent(1, dir);
+			this->_room->setEvent(1, dir, this->_x, this->_y);
 	}
 
 	auto exits = this->_room->getExits();

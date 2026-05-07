@@ -4,6 +4,8 @@
 
 # include "Mob.hpp"
 
+class chainedMap;
+
 //class for event management in room
 class ARoomEvent
 {
@@ -42,6 +44,35 @@ class MobRush : public ARoomEvent
 		// void	checkCleared(void);
 		void	setCleared(bool value);
 
+		std::unordered_map<int, std::unique_ptr<Mob>>	&getMobs(void);
+};
+
+class QuanticRoom : public ARoomEvent
+{
+	private:
+		std::unordered_map<int, std::unique_ptr<Mob>>	_mobs;
+
+		std::array<std::array<std::weak_ptr<chainedMap>, 4>, 5>	_links;
+		
+		uint8_t				_current_place;
+		std::array<int, 2>	_light_place;
+		bool				_started;
+		bool				_lights_on;
+		
+	private:
+		//void	createEvent(void);
+	
+	public:
+		QuanticRoom();
+		~QuanticRoom();
+
+	public:
+		
+		void											addPlace(std::array<std::weak_ptr<chainedMap>, 4> dir, uint8_t loc);
+		void											addMob(int id, float x, float y, int hp);
+		std::array<std::weak_ptr<chainedMap>, 4>		getCurrentExit(void) const;
+		bool											isCleared(void);
+		bool											isStarted(void);
 		std::unordered_map<int, std::unique_ptr<Mob>>	&getMobs(void);
 };
 

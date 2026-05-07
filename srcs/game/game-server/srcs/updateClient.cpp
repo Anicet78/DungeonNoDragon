@@ -35,6 +35,53 @@ void	sendLeaveUpdate(Player &player, uWS::App &app, std::string &topic)
 	app.publish(topic, roomUpdate, uWS::OpCode::TEXT);
 }
 
+static void leaveQuanticRoom(Player &player)
+{
+	Room room = player.getRoom();
+	auto plan = room.getRoomPlan();
+	float x = player.getX(), y = player.getY();
+	auto exitsLoc = room.getExitsLoc();
+	QuanticRoom *event = dynamic_cast<QuanticRoom *>(room.getRoomEvent().get());
+	auto dir = event->getCurrentExit();
+
+	if (exitsLoc[2][0] == static_cast<int>(x) && exitsLoc[2][1] == static_cast<int>(y)
+		&& !dir[2].expired())
+	{
+		player.setExit('S');
+		player.setPrevNode(player.getNode());
+		player.setNode(dir[2].lock());
+		exitsLoc = player.getRoom().getExitsLoc();
+		player.setPos(exitsLoc[0][0] + 0.5, exitsLoc[0][1] + 1);
+	}
+	else if (exitsLoc[0][0] == static_cast<int>(x) && exitsLoc[0][1] == static_cast<int>(y)
+		&& !dir[0].expired())
+	{
+		player.setExit('N');
+		player.setPrevNode(player.getNode());
+		player.setNode(dir[0].lock());
+		exitsLoc = player.getRoom().getExitsLoc();
+		player.setPos(exitsLoc[2][0] + 0.5, exitsLoc[2][1] - 0.1);
+	}
+	else if (exitsLoc[1][0] == static_cast<int>(x) && exitsLoc[1][1] == static_cast<int>(y)
+		&& !dir[1].expired())
+	{
+		player.setExit('E');
+		player.setPrevNode(player.getNode());
+		player.setNode(dir[1].lock());
+		exitsLoc = player.getRoom().getExitsLoc();
+		player.setPos(exitsLoc[3][0] + 1, exitsLoc[3][1] + 0.5);
+	}
+	else if (exitsLoc[3][0] == static_cast<int>(x) && exitsLoc[3][1] == static_cast<int>(y)
+		&& !dir[3].expired())
+	{
+		player.setExit('W');
+		player.setPrevNode(player.getNode());
+		player.setNode(dir[3].lock());
+		exitsLoc = player.getRoom().getExitsLoc();
+		player.setPos(exitsLoc[1][0] - 0.1, exitsLoc[1][1] + 0.5);
+	}
+}
+
 void updateRoom(Player &player, uWS::App &app)
 {
 	Room room = player.getRoom();
@@ -43,7 +90,7 @@ void updateRoom(Player &player, uWS::App &app)
 
 	if (plan[y][x] == 'E')
 	{
-		if (room.getRoomEvent().get() && room.getRoomEvent()->isCleared() == false)
+		if (room.getRoomEvent() && room.getRoomEvent()->isCleared() == false)
 		{
 			if (player.getExit() > 32)
 				player.setExit(' ');
@@ -53,7 +100,11 @@ void updateRoom(Player &player, uWS::App &app)
 
 		std::string	oldTopic = room.getRoomId();
  
-		if (exitsLoc[2][0] == static_cast<int>(x) && exitsLoc[2][1] == static_cast<int>(y)
+		std::shared_ptr<ARoomEvent> rawEvent = room.getRoomEvent();
+
+		if (rawEvent && rawEvent->getType() == "QuanticRoom")
+			leaveQuanticRoom(player);
+		else if (exitsLoc[2][0] == static_cast<int>(x) && exitsLoc[2][1] == static_cast<int>(y)
 			&& !player.getNode()->south.expired())
 		{
 			player.setExit('S');

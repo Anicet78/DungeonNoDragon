@@ -270,7 +270,7 @@ void Room::importRooms()
 	Room::importFloor(path + "floor1/", _RoomsF1);
 }
 
-bool	Room::setEvent(uint8_t event, std::array<std::weak_ptr<chainedMap>, 4> dir)
+bool	Room::setEvent(uint8_t event, std::array<std::weak_ptr<chainedMap>, 4> dir, int x, int y)
 {
 	std::string	name(getName());
 	if (name == "start" || name == "stairs" || name == "waiting")
@@ -279,7 +279,7 @@ bool	Room::setEvent(uint8_t event, std::array<std::weak_ptr<chainedMap>, 4> dir)
 	if (!_event && event == 1)
 		_event = std::make_shared<MobRush>(this->_roomPlan);
 	else if (!_event && event == 2)
-		_event = std::make_shared<QuanticRoom>(this->_roomPlan, dir);
+		_event = std::make_shared<QuanticRoom>(this->_roomPlan, dir, x, y);
 	return true;
 }
 

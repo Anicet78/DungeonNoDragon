@@ -4,6 +4,8 @@
 
 # include "Room.hpp"
 
+class Map;
+
 class chainedMap
 {
 	private:
@@ -26,7 +28,8 @@ class chainedMap
 	
 	public:
 
-		void					addRoom(const Room &room);
+		void					addRoom(const Room &room, Map &map);
+		void					addRoom(std::shared_ptr<Room> &room, Map &map);
 		std::shared_ptr<Room>	getRoom(void) const;
 		void					setPath(int flag);
 		int						getPath() const;
@@ -45,6 +48,8 @@ class Map
 		int						_height;
 		quadList				_head;
 		std::vector<quadList>	_nodes;
+		std::array<quadList, 2>	_nodesQuantic;
+		std::shared_ptr<Room>	_quanticRoom;
 
 
 	public:
@@ -58,8 +63,12 @@ class Map
 		void					link(Map &up);
 		int						getWidth() const;
 		int						getHeight() const;
+		std::shared_ptr<Room>	getQRoom() const;
+		std::array<quadList, 2>	getNodesQuantic() const;
 		void					setRoomInNode(std::string &roomName, int x, int y, int rot, int roomSet, std::shared_ptr<ARoomEvent> event);
+		void					setRoomInNode(std::shared_ptr<Room> room, int x, int y, uint8_t loc);
 		void					setWaitingRoom();
+		void					setQRoom(std::shared_ptr<Room> qRoom);
 };
 
 void printMap(Map &floor0);

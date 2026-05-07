@@ -57,19 +57,23 @@ void	MobRush::createEvent(void) {
 	_nbrMob = _mobs.size();
 }
 
-void	MobRush::destroyEvent(void) {
-	for (auto i : _mobsId) {
+void	MobRush::destroyEvent(void)
+{
+	for (auto i : _mobsId)
+	{
 		_mobs.erase(i);
 	}
 	return ;
 }
 
-void	MobRush::checkCleared(void) {
+void	MobRush::checkCleared(void)
+{
 	if (_cleared == false && _nbrDead == _nbrMob)
 		_cleared = true;
 }
 
-void	MobRush::makeDie(int id) {
+void	MobRush::makeDie(int id)
+{
 	if (_mobs[id]->isDead() == false)
 	{
 		_mobs[id]->die();
@@ -77,18 +81,22 @@ void	MobRush::makeDie(int id) {
 	}
 }
 
-bool	MobRush::isStarted(void) {
+bool	MobRush::isStarted(void)
+{
 	return(_started);
 }
 
-bool	MobRush::isCleared(void) {
+bool	MobRush::isCleared(void)
+{
 	return (_cleared);
 }
 
-std::unordered_map<int, std::unique_ptr<Mob> >	&MobRush::getMobs(void) {
+std::unordered_map<int, std::unique_ptr<Mob> >	&MobRush::getMobs(void)
+{
 	return (_mobs);
 }
 
-std::string const	&ARoomEvent::getType(void) const {
+std::string const	&ARoomEvent::getType(void) const
+{
 	return (this->_type);
 }

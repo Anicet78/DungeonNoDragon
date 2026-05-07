@@ -9,14 +9,62 @@ void updateRoom(Game &game, Player &player, std::string dir)
 
 	auto exitsLoc = room.getExitsLoc();
 
-	if (room.getRoomEvent())
+	std::shared_ptr<ARoomEvent> rawEvent = room.getRoomEvent();
+
+	if (rawEvent)
 	{
-		MobRush &mobrush = dynamic_cast<MobRush &>(*room.getRoomEvent());
-		for (auto &mob : mobrush.getMobs())
+		if (rawEvent->getType() == "MobRush")
 		{
-			mob.second->setIsDead(true);
-			mob.second->setInDeathAnim(false);
+			MobRush &mobrush = dynamic_cast<MobRush &>(*rawEvent);
+			for (auto &mob : mobrush.getMobs())
+			{
+				mob.second->setIsDead(true);
+				mob.second->setInDeathAnim(false);
+			}
 		}
+		else if (rawEvent->getType() == "QuanticRoom")
+		{
+			QuanticRoom &qRoom = dynamic_cast<QuanticRoom &>(*rawEvent);
+			for (auto &mob : qRoom.getMobs())
+			{
+				mob.second->setIsDead(true);
+				mob.second->setInDeathAnim(false);
+			}
+		}
+	}
+
+	if (rawEvent && rawEvent->getType() == "QuanticRoom")
+	{
+		QuanticRoom *qRoom = dynamic_cast<QuanticRoom *>(rawEvent.get());
+		if (dir == "S")
+		{
+			game.clearOtherPlayers();
+			player.setNode(qRoom->getCurrentExit()[2].lock());
+			exitsLoc = player.getRoom().getExitsLoc();
+			player.setPos(exitsLoc[0][0] + 0.5, exitsLoc[0][1] + 1);
+		}
+		else if (dir == "N")
+		{
+			game.clearOtherPlayers();
+			player.setNode(qRoom->getCurrentExit()[0].lock());
+			exitsLoc = player.getRoom().getExitsLoc();
+			player.setPos(exitsLoc[2][0] + 0.5, exitsLoc[2][1] - 0.1);
+		}
+		else if (dir == "E")
+		{
+			game.clearOtherPlayers();
+			player.setNode(qRoom->getCurrentExit()[1].lock());
+			exitsLoc = player.getRoom().getExitsLoc();
+			player.setPos(exitsLoc[3][0] + 1, exitsLoc[3][1] + 0.5);
+		}
+		else if (dir == "W")
+		{
+			game.clearOtherPlayers();
+			player.setNode(qRoom->getCurrentExit()[2].lock());
+			exitsLoc = player.getRoom().getExitsLoc();
+			player.setPos(exitsLoc[1][0] - 0.1, exitsLoc[1][1] + 0.5);
+		}
+		return ;
 	}
 
 	if (dir == "S")

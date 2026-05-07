@@ -408,61 +408,67 @@ static bool	checkWallHitBox(std::vector<std::string> const &plan, FRect const &r
 {
 	if (flag == 0)
 	{
-		float y = rect.y - (6.0f * deltaTime);
-		if (plan[y][rect.x] == '1' || plan[y][rect.x + rect.h] == '1' || plan[y][rect.x] == '3' || plan[y][rect.x + rect.h] == '3')
+		int y = static_cast<int>(rect.y - (6.0f * deltaTime));
+		int rx = static_cast<int>(rect.x);
+		int rh = static_cast<int>(rect.h);
+		if (plan[y][rx] == '1' || plan[y][rx + rh] == '1' || plan[y][rx] == '3' || plan[y][rx + rh] == '3')
 			return (true);
-
 		//if the event in the room is not cleared, player cant go on 'E' tiles
-		std::weak_ptr<ARoomEvent> event = player.getRoomRef().getRoomEvent();
+		std::shared_ptr<ARoomEvent> event = player.getRoomRef().getRoomEvent();
 
-		if (!event.expired() && event.lock()->isCleared() == false)
+		if (event && event->getType() == "MobRush" && event->isCleared() == false)
 		{
-			if (plan[y][rect.x] == 'E' || plan[y][rect.x + rect.h] == 'E')
+			if (plan[y][rx] == 'E' || plan[y][rx + rh] == 'E')
 				return (true);
 		}
 	}
 	if (flag == 1)
 	{
-		float x = rect.x - (6.0f * deltaTime);
-		if (plan[rect.y][x] == '1' || plan[rect.y + rect.h][x] == '1' || plan[rect.y][x] == '3' || plan[rect.y + rect.h][x] == '3')
+		int x = static_cast<int>(rect.x - (6.0f * deltaTime));
+		int ry = static_cast<int>(rect.y);
+		int rh = static_cast<int>(rect.h);
+		if (plan[ry][x] == '1' || plan[ry + rh][x] == '1' || plan[ry][x] == '3' || plan[ry + rh][x] == '3')
 			return (true);
-
 		//if the event in the room is not cleared, player cant go on 'E' tiles
-		std::weak_ptr<ARoomEvent> event = player.getRoomRef().getRoomEvent();
+		std::shared_ptr<ARoomEvent> event = player.getRoomRef().getRoomEvent();
 
-		if (!event.expired() && event.lock()->isCleared() == false)
+		if (event && event->getType() == "MobRush" && event->isCleared() == false)
 		{
-			if (plan[rect.y][x] == 'E' || plan[rect.y + rect.h][x] == 'E')
+			if (plan[ry][x] == 'E' || plan[ry + rh][x] == 'E')
 				return (true);
 		}
 	}
 	if (flag == 2)
 	{
-		float y = rect.y + (6.0f * deltaTime);
-		if (plan[y + rect.h][rect.x] == '1' || plan[y + rect.h][rect.x + rect.w] == '1' || plan[y + rect.h][rect.x] == '3' || plan[y + rect.h][rect.x + rect.w] == '3')
+		int y = static_cast<int>(rect.y + (6.0f * deltaTime));
+		int rx = static_cast<int>(rect.x);
+		int rh = static_cast<int>(rect.h);
+		int rw = static_cast<int>(rect.w);
+		if (plan[y + rh][rx] == '1' || plan[y + rh][rx + rw] == '1' || plan[y + rh][rx] == '3' || plan[y + rh][rx + rw] == '3')
 			return (true);
-		
 		//if the event in the room is not cleared, player cant go on 'E' tiles
-		std::weak_ptr<ARoomEvent> event = player.getRoomRef().getRoomEvent();
+		std::shared_ptr<ARoomEvent> event = player.getRoomRef().getRoomEvent();
 
-		if (!event.expired() && event.lock()->isCleared() == false)
+		if (event && event->getType() == "MobRush" && event->isCleared() == false)
 		{
-			if (plan[y + rect.h][rect.x] == 'E' || plan[y + rect.h][rect.x + rect.w] == 'E')
+			if (plan[y + rh][rx] == 'E' || plan[y + rh][rx + rw] == 'E')
 				return (true);
 		}
 	}
 	if (flag == 3)
 	{
-		float x = rect.x + (6.0f * deltaTime);
-		if (plan[rect.y][x + rect.h] == '1' || plan[rect.y + rect.h][x + rect.w] == '1' || plan[rect.y][x + rect.h] == '3' || plan[rect.y + rect.h][x + rect.w] == '3')
+		int x = static_cast<int>(rect.x + (6.0f * deltaTime));
+		int ry = static_cast<int>(rect.y);
+		int rh = static_cast<int>(rect.h);
+		int rw = static_cast<int>(rect.w);
+		if (plan[ry][x + rh] == '1' || plan[ry + rh][x + rw] == '1' || plan[ry][x + rh] == '3' || plan[ry + rh][x + rw] == '3')
 			return (true);
-		
 		//if the event in the room is not cleared, player cant go on 'E' tiles
-		std::weak_ptr<ARoomEvent> event = player.getRoomRef().getRoomEvent();
+		std::shared_ptr<ARoomEvent> event = player.getRoomRef().getRoomEvent();
 
-		if (!event.expired() && event.lock()->isCleared() == false)
+		if (event && event->getType() == "MobRush" && event->isCleared() == false)
 		{
-			if (plan[rect.y][x + rect.h] == 'E' || plan[rect.y + rect.h][x + rect.w] == 'E')
+			if (plan[ry][x + rh] == 'E' || plan[ry + rh][x + rw] == 'E')
 				return (true);
 		}
 	}

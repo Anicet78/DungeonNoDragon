@@ -57,6 +57,7 @@ class QuanticRoom : public ARoomEvent
 		int									_nbrDead;
 
 		std::array<std::array<std::weak_ptr<chainedMap>, 4>, 5>	_links;
+		std::array<std::array<int, 2>, 5>	_linksPos;
 		
 		uint8_t				_current_place;
 		std::array<int, 2>	_light_place;
@@ -69,17 +70,21 @@ class QuanticRoom : public ARoomEvent
 		void	createEvent(void);
 	
 	public:
-		QuanticRoom(std::vector<std::string> &roomplan, std::array<std::weak_ptr<chainedMap>, 4> dir);
+		QuanticRoom(std::vector<std::string> &roomplan, std::array<std::weak_ptr<chainedMap>, 4> dir, int x, int y);
 		~QuanticRoom();
 
 	public:
 		
-		void	addPlace(std::array<std::weak_ptr<chainedMap>, 4> dir, bool is5thLoc);
-		bool	doesAllLocSet();
-		bool	isCleared(void);
-		bool	isStarted(void);
-		void	checkCleared(void);
-		void	makeDie(int id);
+		void													addPlace(std::array<std::weak_ptr<chainedMap>, 4> dir, bool is5thLoc);
+		std::array<std::weak_ptr<chainedMap>, 4>				getCurrentExit(void) const;
+		std::array<std::array<std::weak_ptr<chainedMap>, 4>, 5>	getLinks(void) const;
+		std::array<std::array<int, 2>, 5>						getLinksPos(void) const;
+		bool													doesAllLocSet();
+		bool													isCleared(void);
+		bool													isStarted(void);
+		void													checkCleared(void);
+		void													makeDie(int id);
+		std::unordered_map<int, std::unique_ptr<Mob>>			&getMobs(void);
 };
 
 class Room
@@ -145,7 +150,7 @@ class Room
 		static void											importRooms();
 		void												randomizeRoom();
 		void												turnMapLeft(void);
-		bool												setEvent(uint8_t event, std::array<std::weak_ptr<chainedMap>, 4> dir);
+		bool												setEvent(uint8_t event, std::array<std::weak_ptr<chainedMap>, 4> dir, int x, int y);
 		void												setRoomId(std::string id);
 		std::shared_ptr<ARoomEvent>							getRoomEvent(void) const;
 		std::shared_ptr<ARoomEvent>							getRoomEventRef(void);

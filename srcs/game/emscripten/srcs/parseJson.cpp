@@ -20,6 +20,38 @@ std::shared_ptr<ARoomEvent>	initMobRush(val &r)
 	return (event);
 }
 
+void	initQRoom(val &r, Map &map, std::string roomName, int rot, int roomSet)
+{
+	std::shared_ptr<ARoomEvent> event = std::make_shared<QuanticRoom>();
+	QuanticRoom &qRoom = dynamic_cast<QuanticRoom &>(*event);
+	int nbr_mob = r["nbr_mob"].as<int>();
+
+	auto mapSet = Room::getFloor(roomSet);
+	Room room = *mapSet[roomName].get();
+	while (rot--)
+		room.turnMapLeft();
+
+	if (nbr_mob != 0)
+	{
+		val mobs = r["mobs"];
+		for (int j = 0; j < nbr_mob; j++)
+		{
+			val mob = mobs[j];
+			int id = mob["mob_id"].as<int>();
+			float x = mob["mob_x"].as<float>();
+			float y = mob["mob_y"].as<float>();
+			qRoom.addMob(id, x, y, 3);
+		}
+	};
+
+	quadList node = map.getNodesQuantic()[0];
+
+	qRoom.addPlace({node->north, node->east, node->south, node->west}, 4);
+
+	room.setEvent(event);
+	map.setQRoom(std::make_shared<Room>(room));
+}
+
 void	fillMap(std::vector<Map> &maps, val &msg, std::string mapName)
 {
 	val mObj = msg[mapName];
@@ -42,6 +74,12 @@ void	fillMap(std::vector<Map> &maps, val &msg, std::string mapName)
 			{
 				auto mobrush = initMobRush(r);
 				maps.back().setRoomInNode(name, x, y, rot, maps.size() - 1, mobrush);
+			}
+			else if (event_type == "QuanticRoom")
+			{
+				if (!maps.back().getQRoom())
+					initQRoom(r, maps.back(), name, rot, maps.size() - 1);
+				maps.back().setRoomInNode(maps.back().getQRoom(), x, y, r["qRoomLoc"].as<int>());
 			}
 			else
 				maps.back().setRoomInNode(name, x, y, rot, maps.size() - 1, NULL);

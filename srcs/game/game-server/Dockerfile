@@ -23,4 +23,4 @@ RUN apt-get update && apt-get install -y --no-install-recommends libcurl4-openss
 WORKDIR /src/game-server
 COPY --from=builder /app/game-server .
 
-CMD ["./game-server"]
+CMD ["valgrind", "./game-server"]

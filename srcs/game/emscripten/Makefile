@@ -39,6 +39,7 @@ SRCS		=	main.cpp \
 				engine/printMap/print_forest.cpp \
 				engine/SDLTimer.cpp \
 				engine/RoomEvent.cpp \
+				engine/QuanticRoom.cpp \
 				engine/Mob.cpp \
 				player/Player.cpp \
 				player/PlayerAssets.cpp \

@@ -109,12 +109,42 @@ void	Session::linkMaps(Map &down, Map &up)
 	down.link(up);
 }
 
-void	putRoomEvent(std::string &msg, std::shared_ptr<Room> room)
+void	putRoomEvent(std::string &msg, std::shared_ptr<Room> room, quadList &node)
 {
 	msg += ", \"room_event\": \"" + room->getRoomEvent()->getType() + '\"';
 	if (room->getRoomEvent()->getType() == "MobRush")
 	{
 		MobRush &event = dynamic_cast<MobRush &>(*room->getRoomEvent());
+		std::unordered_map<int, std::unique_ptr<Mob>> &mobs = event.getMobs();
+		if (mobs.size())
+		{
+			msg += ", \"nbr_mob\": " + std::to_string(mobs.size());
+			msg += ", \"mobs\": [";
+			for (auto it = mobs.begin(); it != mobs.end(); ++it)
+			{
+				Mob	&mob = *it->second;
+				msg += "{\"mob_id\": " + std::to_string(it->first) + ", "
+					+ "\"mob_x\": " + std::to_string(mob.getX()) + ", "
+					+ "\"mob_y\": " + std::to_string(mob.getY()) + "},";
+			}
+			if (*msg.rbegin() == ',')
+				msg.pop_back();
+			msg += "]";
+		}
+	}
+	else if (room->getRoomEvent()->getType() == "QuanticRoom")
+	{
+		QuanticRoom &event = dynamic_cast<QuanticRoom &>(*room->getRoomEvent());
+
+		size_t i = 0;
+		for (i = 0; i < 4; i++)
+		{
+			auto dir = event.getLinksPos()[i];
+			
+			if (node->getX() == dir[0] && node->getY() == dir[1])
+				break ;
+		}
+		msg +=  ", \"qRoomLoc\": " + std::to_string(i);
 		std::unordered_map<int, std::unique_ptr<Mob>> &mobs = event.getMobs();
 		if (mobs.size())
 		{
@@ -162,7 +192,7 @@ std::string	Session::sendMaps(void)
 				+ "\"y\": " + std::to_string(node->getY()) + ", "
 				+ "\"rot\": " + std::to_string(room->getRotated());
 			if (room->getRoomEvent())
-				putRoomEvent(msg, room);
+				putRoomEvent(msg, room, node);
 			msg += '}';
 			j++;
 		}

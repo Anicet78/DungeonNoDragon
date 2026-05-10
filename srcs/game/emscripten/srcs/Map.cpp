@@ -14,7 +14,12 @@ chainedMap::~chainedMap(void)
 
 //Member Functions--------------------------------------------------------
 
-void chainedMap::addRoom(const Room &room, Map &map)
+void	chainedMap::setRoomInQNode(std::shared_ptr<Room> room)
+{
+	this->_room = room;
+}
+
+void	chainedMap::addRoom(const Room &room, Map &map)
 {
 	if (this->_room)
 		*this->_room = room;
@@ -345,13 +350,13 @@ int	Map::getWidth() const
 	return this->_width;
 }
 
-std::array<quadList, 2>	Map::getNodesQuantic() const
+std::array<quadList, 2>	&Map::getNodesQuantic()
 {
 	return this->_nodesQuantic;
 }
 
 
-std::shared_ptr<Room>	Map::getQRoom(void) const
+std::shared_ptr<Room>	Map::getQRoom(void)
 {
 	return this->_quanticRoom;
 }

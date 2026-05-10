@@ -65,7 +65,7 @@ void	manageSoil(int x, int y, Player &player);
 void	manage_wall_forest(int x, int y, Player &player, int iteration);
 
 void	print_others(Player &player, std::vector<Player> &otherPlayers, int flag);
-void	print_mobs(MobRush &mobRush, Player &player, int flag);
+void	print_mobs(std::shared_ptr<ARoomEvent> &event, Player &player, int flag);
 bool	isUnderTree(std::vector<std::string> plan, int x, int y);
 void	loopPlayerState(Game &game, val playerUpdate);
 void	loopRoomState(Game &game, val roomUpdate);

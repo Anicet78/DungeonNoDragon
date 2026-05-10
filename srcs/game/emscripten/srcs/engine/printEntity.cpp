@@ -18,11 +18,24 @@ void	print_others(Player &player, std::vector<Player> &otherPlayers, int flag)
 	}
 }
 
-void print_mobs(MobRush &mobRush, Player &player, int flag)
+void print_mobs(std::shared_ptr<ARoomEvent> &event, Player &player, int flag)
 {
 	int		tile_s = gSdl.getMapTileSize() * 2;
 	Camera	&cam = player.getCamera();
-	for (auto &mob : mobRush.getMobs())
+	std::unordered_map<int, std::unique_ptr<Mob>> *mobs = nullptr;
+	if (event->getType() == "MobRush")
+	{
+		MobRush *mobrush = dynamic_cast<MobRush *>(event.get());
+		mobs = &mobrush->getMobs();
+	}
+	else if (event->getType() == "QuanticRoom")
+	{
+		QuanticRoom *qRoom = dynamic_cast<QuanticRoom *>(event.get());
+		mobs = &qRoom->getMobs();
+	}
+	else
+		return ;
+	for (auto &mob : *mobs)
 	{
 		if (mob.second->isDead() == false)
 		{

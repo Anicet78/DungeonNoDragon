@@ -129,13 +129,24 @@ void	Hud::printPlayerName(Player const &player)
 void	Hud::printNbMobs(Player const &player)
 {
 	Room &room = player.getRoom();
+	std::shared_ptr<ARoomEvent> event = room.getRoomEvent();
 	static int nb = 0;
 
-	if (room.getRoomEvent())
+	if (event)
 	{
-		MobRush &mobrush = dynamic_cast<MobRush &>(*room.getRoomEvent());
+		std::unordered_map<int, std::unique_ptr<Mob>> *mobs = nullptr;
+		if (event->getType() == "MobRush")
+		{
+			MobRush *mobrush = dynamic_cast<MobRush *>(event.get());
+			mobs = &mobrush->getMobs();
+		}
+		else if (event->getType() == "MobRush")
+		{
+			QuanticRoom *qRoom = dynamic_cast<QuanticRoom *>(event.get());
+			mobs = &qRoom->getMobs();
+		}
 		int size = 0;
-		for (auto &mob : mobrush.getMobs())
+		for (auto &mob : *mobs)
 		{
 			if (!mob.second->isDead())
 				size++;

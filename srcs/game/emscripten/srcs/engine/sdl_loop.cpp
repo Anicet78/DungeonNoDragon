@@ -60,7 +60,7 @@ void updateRoom(Game &game, Player &player, std::string dir)
 		else if (dir == "W")
 		{
 			game.clearOtherPlayers();
-			player.setNode(qRoom->getCurrentExit()[2].lock());
+			player.setNode(qRoom->getCurrentExit()[3].lock());
 			exitsLoc = player.getRoom().getExitsLoc();
 			player.setPos(exitsLoc[1][0] - 0.1, exitsLoc[1][1] + 0.5);
 		}
@@ -70,30 +70,46 @@ void updateRoom(Game &game, Player &player, std::string dir)
 	if (dir == "S")
 	{
 		game.clearOtherPlayers();
+		std::cout << "setNode..." << std::endl;
 		player.setNode(player.getNode()->south.lock());
+		std::cout << "getRoom..." << std::endl;
 		exitsLoc = player.getRoom().getExitsLoc();
+		std::cout << "setPos..." << std::endl;
 		player.setPos(exitsLoc[0][0] + 0.5, exitsLoc[0][1] + 1);
+		std::cout << "done !" << std::endl;
 	}
 	else if (dir == "N")
 	{
 		game.clearOtherPlayers();
+		std::cout << "setNode..." << std::endl;
 		player.setNode(player.getNode()->north.lock());
+		std::cout << "getRoom..." << std::endl;
 		exitsLoc = player.getRoom().getExitsLoc();
+		std::cout << "setPos..." << std::endl;
 		player.setPos(exitsLoc[2][0] + 0.5, exitsLoc[2][1] - 0.1);
+		std::cout << "done !" << std::endl;
 	}
 	else if (dir == "E")
 	{
 		game.clearOtherPlayers();
+		std::cout << "setNode..." << std::endl;
 		player.setNode(player.getNode()->east.lock());
+		std::cout << "getRoom..." << std::endl;
 		exitsLoc = player.getRoom().getExitsLoc();
+		std::cout << "setPos..." << std::endl;
 		player.setPos(exitsLoc[3][0] + 1, exitsLoc[3][1] + 0.5);
+		std::cout << "done !" << std::endl;
 	}
 	else if (dir == "W")
 	{
 		game.clearOtherPlayers();
+		std::cout << "setNode..." << std::endl;
 		player.setNode(player.getNode()->west.lock());
+		std::cout << "getRoom..." << std::endl;
 		exitsLoc = player.getRoom().getExitsLoc();
+		std::cout << "setPos..." << std::endl;
 		player.setPos(exitsLoc[1][0] - 0.1, exitsLoc[1][1] + 0.5);
+		std::cout << "done !" << std::endl;
 	}
 	else if (dir == "U")
 	{
@@ -241,26 +257,25 @@ void	game_loop(Game &game, double deltaTime)
 {
 	Player	&player = game.getPlayer();
 	Camera	&camera = player.getCamera();
-
+	std::shared_ptr<ARoomEvent> event = player.getRoom().getRoomEvent();
+	
 	updatePlayerPosition(game.getPlayer(), deltaTime); 
 	updateOtherPlayer(game.getOtherPlayers(), deltaTime);
 	SDL_SetRenderTarget(gSdl.renderer, gSdl.game);
 	SDL_RenderClear(gSdl.renderer);
 	print_map(player);
-	if (player.getRoom().getRoomEvent())
-	{
-		MobRush &mobrush = dynamic_cast<MobRush &>(*player.getRoom().getRoomEvent());
-		print_mobs(mobrush, player, 0);
-	}
+
+	if (event)
+		print_mobs(event, player, 0);
+	
 	print_others(player, game.getOtherPlayers(), 0);
 	player.printPlayer(player.getScreenX(), player.getScreenY(), 0);
 	SDL_Rect dst = {0, 0, SCREEN_WIDTH, GAME_HEIGHT};
 	SDL_RenderCopy(gSdl.renderer, gSdl.texture2, &camera.getCamera(), &dst);
-	if (player.getRoom().getRoomEvent())
-	{
-		MobRush &mobrush = dynamic_cast<MobRush &>(*player.getRoom().getRoomEvent());
-		print_mobs(mobrush, player, 1);
-	}
+
+	if (event)
+		print_mobs(event, player, 1);
+	
 	print_others(player, game.getOtherPlayers(), 1);
 	if (isUnderTree(player.getRoomRef().getRoomPlan(), player.getX(), player.getY()))
 		player.printPlayer(player.getScreenX(), player.getScreenY(), 1);

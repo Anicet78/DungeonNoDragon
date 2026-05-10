@@ -31,7 +31,7 @@ bool	MobRush::isCleared(void)
 	return (_cleared);
 }
 
-std::unordered_map<int, std::unique_ptr<Mob> >	&MobRush::getMobs(void)
+std::unordered_map<int, std::unique_ptr<Mob>>	&MobRush::getMobs(void)
 {
 	return (_mobs);
 }

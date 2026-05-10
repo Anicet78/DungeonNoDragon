@@ -30,6 +30,7 @@ class chainedMap
 
 		void					addRoom(const Room &room, Map &map);
 		void					addRoom(std::shared_ptr<Room> &room, Map &map);
+		void					setRoomInQNode(std::shared_ptr<Room> room);
 		std::shared_ptr<Room>	getRoom(void) const;
 		void					setPath(int flag);
 		int						getPath() const;
@@ -63,8 +64,8 @@ class Map
 		void					link(Map &up);
 		int						getWidth() const;
 		int						getHeight() const;
-		std::shared_ptr<Room>	getQRoom() const;
-		std::array<quadList, 2>	getNodesQuantic() const;
+		std::shared_ptr<Room>	getQRoom();
+		std::array<quadList, 2>	&getNodesQuantic();
 		void					setRoomInNode(std::string &roomName, int x, int y, int rot, int roomSet, std::shared_ptr<ARoomEvent> event);
 		void					setRoomInNode(std::shared_ptr<Room> room, int x, int y, uint8_t loc);
 		void					setWaitingRoom();

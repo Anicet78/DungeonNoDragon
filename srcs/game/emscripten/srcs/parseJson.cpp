@@ -44,12 +44,12 @@ void	initQRoom(val &r, Map &map, std::string roomName, int rot, int roomSet)
 		}
 	};
 
-	quadList node = map.getNodesQuantic()[0];
+	quadList &node = map.getNodesQuantic()[0];
 
 	qRoom.addPlace({node->north, node->east, node->south, node->west}, 4);
-
 	room.setEvent(event);
 	map.setQRoom(std::make_shared<Room>(room));
+	node->setRoomInQNode(map.getQRoom());
 }
 
 void	fillMap(std::vector<Map> &maps, val &msg, std::string mapName)
